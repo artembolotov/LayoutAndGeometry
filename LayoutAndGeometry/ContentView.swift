@@ -7,35 +7,45 @@
 
 import SwiftUI
 
-extension VerticalAlignment {
-    enum  MidAccountAndName: AlignmentID {
-        static func defaultValue(in context: ViewDimensions) -> CGFloat {
-            context[.top]
+struct OuterView: View {
+    var body: some View {
+        VStack {
+            Text("Top")
+            InnerView()
+                .background(.green)
+            Text("Bottom")
         }
     }
-    
-    static let midAccountAndName = VerticalAlignment(MidAccountAndName.self)
+}
+
+struct InnerView: View {
+    var body: some View {
+        HStack {
+            Text("Left")
+            
+            GeometryReader { geo in
+                Text("Center")
+                    .background(.blue)
+                    .onTapGesture {
+                        print("Global center: \(geo.frame(in: .global).midX) x \(geo.frame(in: .global).midY)")
+                        
+                        print("Local center: \(geo.frame(in: .local).midX) x \(geo.frame(in: .local).midY)")
+                        
+                        print("Custom center: \(geo.frame(in: .named("Custom")).midX) x \(geo.frame(in: .named("Custom ")).midY)")
+                    }
+            }
+            .background(.orange)
+            
+            Text("Right")
+        }
+    }
 }
 
 struct ContentView: View {
     var body: some View {
-        HStack(alignment: .midAccountAndName) {
-            VStack {
-                Text("@artembolotov")
-                    .alignmentGuide(.midAccountAndName) { $0[VerticalAlignment.center] }
-                
-                Rectangle()
-                    .fill(.red)
-                    .frame(width: 64, height: 64)
-            }
-            
-            VStack {
-                Text("Full name:")
-                Text("ARTEM BOLOTOV")
-                    .alignmentGuide(.midAccountAndName) { $0[VerticalAlignment.center] }
-                    .font(.largeTitle)
-            }
-        }
+        OuterView()
+            .background(.red)
+            .coordinateSpace(name: "Custom")
     }
 }
 
