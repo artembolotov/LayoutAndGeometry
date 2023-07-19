@@ -7,45 +7,31 @@
 
 import SwiftUI
 
-struct OuterView: View {
-    var body: some View {
-        VStack {
-            Text("Top")
-            InnerView()
-                .background(.green)
-            Text("Bottom")
-        }
-    }
-}
-
-struct InnerView: View {
-    var body: some View {
-        HStack {
-            Text("Left")
-            
-            GeometryReader { geo in
-                Text("Center")
-                    .background(.blue)
-                    .onTapGesture {
-                        print("Global center: \(geo.frame(in: .global).midX) x \(geo.frame(in: .global).midY)")
-                        
-                        print("Local center: \(geo.frame(in: .local).midX) x \(geo.frame(in: .local).midY)")
-                        
-                        print("Custom center: \(geo.frame(in: .named("Custom")).midX) x \(geo.frame(in: .named("Custom ")).midY)")
-                    }
-            }
-            .background(.orange)
-            
-            Text("Right")
-        }
-    }
-}
-
 struct ContentView: View {
+    let colors = [Color.red, .green, .blue, .orange, .pink, .purple, .yellow]
+    private let minOffset: CGFloat = 200.0
+    
     var body: some View {
-        OuterView()
-            .background(.red)
-            .coordinateSpace(name: "Custom")
+        GeometryReader { fullView in
+            ScrollView {
+                let screenHeight = fullView.size.height
+                
+                ForEach(0..<50) { index in
+                    GeometryReader { geo in
+                        let minY = geo.frame(in: .global).minY
+                        
+                        Text("Row #\(index )")
+                            .font(.title)
+                            .frame(maxWidth: .infinity)
+                            .background(colors[index % colors.count])
+                            .scaleEffect(minY < minOffset ? (minY / minOffset) * 0.5 + 0.5 : minY > screenHeight - minOffset ? 1 + ( minY - screenHeight + minOffset) / minOffset * 0.1 : 1)
+                            .opacity(minY > minOffset ? 1 : minY / minOffset)
+                            .rotation3DEffect(.degrees(minY - screenHeight / 2) / 5, axis: (x: 0, y: 1, z: 0))
+                    }
+                    .frame(height:  40)
+                }
+            }
+        }
     }
 }
 
